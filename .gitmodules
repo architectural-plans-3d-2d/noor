@@ -1,0 +1,3 @@
+[submodule "blueprints/daata_hamlet/daata-hamlet-3d"]
+	path = blueprints/daata_hamlet/daata-hamlet-3d
+	url = https://github.com/architectural-plans-3d-2d/daata-hamlet.git
