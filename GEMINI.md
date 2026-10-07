@@ -11,3 +11,8 @@
      - `blender-archviz-automation`
      - `comfyui-archviz-controlnet`
      - `openscad-parametric-cad`
+  5. Multi-agent co-development with Claude:
+     - Respect Claude's files (`.claude/`, `CLAUDE.md`, subproject checkouts).
+     - Always fetch and reconcile remote before pushing to avoid clashes.
+     - Never force push.
+

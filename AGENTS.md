@@ -19,3 +19,14 @@
 - **Interactive WebGL:** Three.js pipeline (`npm run dev`, `npm run build`, `dist/`).
 - **Photorealistic Offline Rendering:** Blender 5.1 Cycles (`scripts/blender_runner.py scripts/blender_cycles_render.py <model> <output.png>`).
 - **Mesh Validation & Analysis:** Python `trimesh` (`scripts/mesh_pipeline.py <model>`).
+
+## 4. Multi-Agent Coexistence & Git Sync Standards (Antigravity & Claude)
+- **Zero Collision Policy:** Both Antigravity and Claude co-develop in this repository. Neither agent shall overwrite, stomp, or collide with the other's work.
+- **Dedicated Agent Spaces:**
+  - Claude configs and skills reside in `.claude/` and `CLAUDE.md`.
+  - Antigravity configs and skills reside in `.agents/`, `AGENTS.md`, and `GEMINI.md`.
+  - Subprojects such as `blueprints/daata_hamlet/daata-hamlet-3d` are isolated and not modified without explicit instruction.
+- **Git Fetch-Before-Push:** Always run `git fetch origin` before committing or pushing to ensure remote commits from Claude are detected and integrated.
+- **No Force Pushing:** Never use `git push --force` or `--force-with-lease`.
+- **Modular Namespacing:** Put new architectural assets, models, scripts, and renders in dedicated project folders to prevent file contention.
+
