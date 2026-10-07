@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TESS-LUMEN // Printable 1:1 DIY Facet Pattern</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 15mm;
+    }
+    body {
+      font-family: monospace;
+      color: #111;
+      background: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    .header {
+      border-bottom: 2px solid #111;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    h1 { margin: 0 0 5px 0; font-size: 18px; text-transform: uppercase; }
+    p { margin: 0; font-size: 12px; color: #555; }
+    .page-box {
+      border: 1px dashed #888;
+      padding: 15px;
+      margin-bottom: 30px;
+      page-break-after: always;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .note {
+      font-size: 11px;
+      color: #444;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+    @media print {
+      body { padding: 0; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print" style="background: #fef3c7; border: 1px solid #f59e0b; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+    <strong>🖨️ Home Printing Instructions:</strong> Click <strong>Print (Ctrl+P)</strong>. Set Scale to <strong>100% (Actual Size)</strong>. Do not select "Fit to Page" to maintain exact 1:1 scale for tracing onto your 3mm craft plywood or cardboard.
+  </div>
+
+  <div class="page-box">
+    <div class="header">
+      <h1>TESS-LUMEN // Facet Template A: Primary Triangular Facet</h1>
+      <p>Print 16 copies (or print 1 and use as a reusable cardboard cutting jig) | Base: 280mm, Height: 280mm</p>
+    </div>
+
+    <svg viewBox="0 0 320 320">
+      <!-- Triangle Cut Line -->
+      <polygon points="160,20 20,290 300,290" fill="#f9fafb" stroke="#111" stroke-width="2"/>
+      
+      <!-- Center Reference Marking -->
+      <line x1="160" y1="20" x2="160" y2="290" stroke="#888" stroke-dasharray="4,4"/>
+      
+      <!-- Magnet Pocket Placement Indicators (Ø8mm) -->
+      <circle cx="160" cy="40" r="8" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/>
+      <text x="175" y="44" font-size="9" fill="#111">N52 Magnet Pocket (Top)</text>
+
+      <circle cx="45" cy="275" r="8" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/>
+      <text x="60" y="278" font-size="9" fill="#111">Magnet (Left Corner)</text>
+
+      <circle cx="275" cy="275" r="8" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/>
+      <text x="180" y="278" font-size="9" fill="#111">Magnet (Right Corner)</text>
+
+      <!-- Dimension text -->
+      <text x="135" y="308" font-size="11" font-weight="bold">280 mm</text>
+      <text x="165" y="160" font-size="11" font-weight="bold">280 mm H</text>
+    </svg>
+
+    <div class="note">
+      <strong>How to use this template:</strong><br>
+      1. Cut along the solid black triangle line with scissors.<br>
+      2. Place the paper triangle onto your 3mm craft plywood or dense cardboard.<br>
+      3. Trace the perimeter with a pencil and trace the yellow circles for magnet pocket locations.<br>
+      4. Make 3–4 light scoring passes with a utility knife along a metal ruler to cut your wood facet.
+    </div>
+  </div>
+
+</body>
+</html>

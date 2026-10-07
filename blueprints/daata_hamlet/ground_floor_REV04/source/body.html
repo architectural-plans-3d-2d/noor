@@ -1,0 +1,424 @@
+<title>Daata Hamlet 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed 3D canvas; slim title bar on top; a drafting-sheet control tray at the bottom (thumb reach). */
+:root {
+  --paper: #eef1f4;      /* page / canvas ground */
+  --sheet: #ffffff;      /* tray + cards */
+  --ink: #17212b;        /* text */
+  --muted: #5d6b78;      /* secondary text */
+  --line: #d3dae1;       /* hairlines */
+  --accent: #b5482b;     /* survey-peg red */
+  --accent-ink: #ffffff;
+  --sky: #dfe7ee;        /* 3D background */
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", Roboto, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #10161c; --sheet: #182129; --ink: #e8edf1; --muted: #9aa8b5; --line: #2a3640;
+  --accent: #e2724f; --accent-ink: #10161c; --sky: #1b252e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #10161c; --sheet: #182129; --ink: #e8edf1; --muted: #9aa8b5; --line: #2a3640;
+  --accent: #e2724f; --accent-ink: #10161c; --sky: #1b252e; color-scheme: dark }
+html, body { height: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); overflow: hidden; }
+.app { position: relative; height: 100%; display: flex; flex-direction: column; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px;
+  background: var(--sheet); border-bottom: 1px solid var(--line); }
+.brand { min-width: 0; }
+.brand h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: .02em; margin: 0; text-wrap: balance; }
+.brand p { margin: 2px 0 0; font-size: .72rem; color: var(--muted); font-family: var(--font-data); letter-spacing: .04em; text-transform: uppercase; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; flex: none; }
+.seg button { border: 0; background: transparent; color: var(--ink); font: 500 .8rem var(--font-body); padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.stage { position: relative; flex: 1; min-height: 0; background: var(--sky); touch-action: none; }
+canvas { display: block; width: 100%; height: 100%; }
+#labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.lbl { position: absolute; transform: translate(-50%, -50%); font: 500 .66rem var(--font-body); color: var(--ink);
+  background: color-mix(in srgb, var(--sheet) 82%, transparent); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+.lbl.door { font-family: var(--font-data); color: var(--accent); background: transparent; font-size: .62rem; }
+.status { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); font: 500 .85rem var(--font-body);
+  color: var(--muted); background: var(--sheet); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--line); }
+.hint { position: absolute; left: 16px; top: 10px; font: .68rem var(--font-data); color: var(--muted); }
+.card { position: absolute; right: 12px; top: 10px; width: min(240px, calc(100% - 24px)); background: var(--sheet); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; box-shadow: 0 6px 24px rgb(0 0 0 / .12); }
+.card h2 { margin: 0 0 4px; font: 700 .95rem var(--font-display); }
+.card dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; font-size: .78rem; }
+.card dt { color: var(--muted); } .card dd { margin: 0; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.card button { position: absolute; right: 6px; top: 4px; border: 0; background: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; }
+.tray { background: var(--sheet); border-top: 1px solid var(--line); padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 10px; }
+.views { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.views::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 7px 12px;
+  font: 500 .78rem var(--font-body); cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: .78rem; }
+.row label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.cut { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 180px; }
+.cut input { flex: 1; accent-color: var(--accent); }
+.cut output { font-family: var(--font-data); min-width: 5.5em; text-align: right; font-variant-numeric: tabular-nums; }
+.facts { font: .7rem var(--font-data); color: var(--muted); letter-spacing: .02em; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>Daata Hamlet Residence</h1>
+      <p>Ground floor · REV-04</p>
+    </div>
+    <div class="seg" role="group" aria-label="Stair option">
+      <button id="optL" aria-pressed="true">L stair</button>
+      <button id="optU" aria-pressed="false">U stair</button>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="c"></canvas>
+    <div id="labels"></div>
+    <div class="hint" id="hint">Drag to turn · pinch to zoom · tap a room</div>
+    <div class="status" id="status">Loading model…</div>
+    <div class="card" id="card" hidden>
+      <button id="cardClose" aria-label="Close">×</button>
+      <h2 id="cardTitle"></h2>
+      <dl id="cardBody"></dl>
+    </div>
+  </div>
+
+  <div class="tray">
+    <div class="views" id="views" role="group" aria-label="Viewpoints"></div>
+    <div class="row">
+      <div class="cut">
+        <span>Cut height</span>
+        <input type="range" id="cutH" min="1.0" max="12.5" step="0.25" value="11.5" aria-label="Cut height in feet above floor">
+        <output id="cutOut" for="cutH">11'-6"</output>
+      </div>
+      <label><input type="checkbox" id="tLabels" checked> Room names</label>
+      <label><input type="checkbox" id="tDoors"> Door tags</label>
+      <label><input type="checkbox" id="tFurn" checked> Furniture</label>
+      <button class="chip" id="gateBtn" aria-pressed="false">Open car gate</button>
+    </div>
+    <div class="facts" id="facts"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
+<script>
+const INFO = /*INFO*/null;
+const FT = 0.3048;
+const FURN = /^(KING|SIDE|STUDY|SHOWER|WC|BASIN|VANITY|WARDROBE|SHELVES|COUNTER|FRIDGE|DINING|CHAIRS|TV|SOFA|COFFEE|ARMCHAIR|CENTRE|car_|wheel)/;
+
+const stage = document.getElementById('stage');
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.autoUpdate = false;   // shadows are re-baked only when something moves
+let dirty = true; const redraw = (shadows) => { dirty = true; if (shadows) renderer.shadowMap.needsUpdate = true; };
+renderer.localClippingEnabled = true;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.maxPolarAngle = Math.PI * 0.495; controls.minDistance = 1.2; controls.maxDistance = 80;
+
+// soft image-based light + a warm low sun from the south-west (afternoon in Pakistan)
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xdfeaf5, 0x8a7f6c, 0.35));
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.1);
+sun.position.set(-14, 22, 16); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.04;
+Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 22, bottom: -22, near: 1, far: 70 });
+scene.add(sun);
+
+const clip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 100);
+const loader = new THREE.GLTFLoader();
+const cache = {};
+let model = null, version = 'L', floors = [];
+
+function themeColors() {
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.dataset.theme !== 'light'
+            || document.documentElement.dataset.theme === 'dark';
+  const c = document.createElement('canvas'); c.width = 4; c.height = 256;
+  const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, dark ? '#1c2a38' : '#a9c6e0'); gr.addColorStop(.55, dark ? '#2e3b45' : '#e3ecf3'); gr.addColorStop(1, dark ? '#3a4249' : '#efe9de');
+  g.fillStyle = gr; g.fillRect(0, 0, 4, 256);
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; scene.background = t;
+  scene.fog = new THREE.Fog(dark ? 0x2e3b45 : 0xe3ecf3, 45, 140);
+  if (typeof redraw === 'function') redraw(false);
+}
+themeColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', themeColors);
+
+// ---------- procedural surface textures (no image files needed)
+function tex(draw, size = 256, rep = 1) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const g = c.getContext('2d'); draw(g, size);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.encoding = THREE.sRGBEncoding;
+  t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); t.userData = { metres: rep };
+  return t;
+}
+function noise(g, n, a, b, alpha) {
+  for (let i = 0; i < n; i++) { g.fillStyle = Math.random() < .5 ? a : b; g.globalAlpha = alpha * Math.random();
+    g.fillRect(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 2, 1 + Math.random() * 2); }
+  g.globalAlpha = 1;
+}
+const TEX = {
+  wood: tex((g, s) => { const cols = ['#a9764a', '#b07d50', '#9d6c43', '#b5845a'];
+    for (let r = 0; r < 8; r++) { g.fillStyle = cols[r % 4]; g.fillRect(0, r * 32, s, 32);
+      for (let k = 0; k < 30; k++) { g.strokeStyle = 'rgba(70,40,20,.12)'; g.beginPath(); const y = r * 32 + Math.random() * 32;
+        g.moveTo(0, y); g.bezierCurveTo(80, y + 3, 160, y - 3, 256, y); g.stroke(); }
+      g.fillStyle = 'rgba(60,35,15,.45)'; g.fillRect(0, r * 32, s, 1.5); g.fillRect(((r * 97) % 256), r * 32, 1.5, 32); } }, 256, 1.6),
+  tile: tex((g, s) => { g.fillStyle = '#e9e6e0'; g.fillRect(0, 0, s, s); noise(g, 3000, '#d8d3ca', '#f6f4ef', .6);
+    g.fillStyle = '#c9c3b8'; g.fillRect(0, 0, s, 2); g.fillRect(0, 0, 2, s); }, 256, 0.61),
+  wet: tex((g, s) => { g.fillStyle = '#cfd8df'; g.fillRect(0, 0, s, s); noise(g, 2000, '#bcc7cf', '#e2e9ee', .6);
+    g.fillStyle = '#a9b4bd'; for (let i = 0; i < 4; i++) { g.fillRect(0, i * 64, s, 2); g.fillRect(i * 64, 0, 2, s); } }, 256, 0.61),
+  stone: tex((g, s) => { g.fillStyle = '#cdbb98'; g.fillRect(0, 0, s, s);
+    for (let r = 0; r < 6; r++) { let x = (r % 2) * -30; while (x < s) { const w = 40 + Math.random() * 50;
+      g.fillStyle = `hsl(${36 + Math.random() * 8},${22 + Math.random() * 12}%,${66 + Math.random() * 10}%)`; g.fillRect(x + 2, r * 43 + 2, w - 3, 40);
+      x += w; } }
+    noise(g, 4000, '#8f7b5a', '#efe2c8', .35); }, 256, 1.2),
+  plinth: tex((g, s) => { g.fillStyle = '#a19a8f'; g.fillRect(0, 0, s, s); noise(g, 5000, '#7f786d', '#c3bcb1', .5); }, 256, 1),
+  paver: tex((g, s) => { g.fillStyle = '#b9b3a8'; g.fillRect(0, 0, s, s);
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 2; c++) { g.fillStyle = `hsl(35,${6 + Math.random() * 6}%,${66 + Math.random() * 8}%)`;
+      g.fillRect(c * 128 + (r % 2) * 64 + 2, r * 64 + 2, 124, 60); g.fillRect(c * 128 + (r % 2) * 64 - 256 + 2, r * 64 + 2, 124, 60); }
+    noise(g, 2500, '#8d877c', '#dad4c8', .3); }, 256, 1.2),
+  grass: tex((g, s) => { g.fillStyle = '#5f9a48'; g.fillRect(0, 0, s, s); noise(g, 9000, '#3f7a30', '#86bd62', .7); }, 256, 1.5),
+  ground: tex((g, s) => { g.fillStyle = '#b8ad97'; g.fillRect(0, 0, s, s); noise(g, 7000, '#9a8f78', '#d2c8b2', .55); }, 256, 3),
+  road: tex((g, s) => { g.fillStyle = '#565b60'; g.fillRect(0, 0, s, s); noise(g, 9000, '#3e4246', '#7a7f84', .6); }, 256, 2),
+  wall: tex((g, s) => { g.fillStyle = '#f2efe8'; g.fillRect(0, 0, s, s); noise(g, 2500, '#e2ddd2', '#ffffff', .35); }, 256, 2),
+  boundary: tex((g, s) => { g.fillStyle = '#e9e3d6'; g.fillRect(0, 0, s, s); noise(g, 3000, '#d6cfbf', '#f7f3ea', .45); }, 256, 2),
+  stair: tex((g, s) => { g.fillStyle = '#ece8e1'; g.fillRect(0, 0, s, s); noise(g, 2000, '#d9d2c6', '#ffffff', .4);
+    g.strokeStyle = 'rgba(150,140,125,.25)'; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(Math.random() * s, 0); g.lineTo(Math.random() * s, s); g.stroke(); } }, 256, 1),
+  counter: tex((g, s) => { g.fillStyle = '#26292d'; g.fillRect(0, 0, s, s); noise(g, 5000, '#121417', '#6b7077', .6); }, 256, 0.8),
+};
+const ROUGH = { wood: .55, tile: .25, wet: .2, stone: .9, plinth: .85, paver: .85, grass: 1, ground: 1, road: .9, wall: .9,
+                boundary: .9, stair: .35, counter: .2, glass: .05, door: .5, gate: .4, frame: .4 };
+
+// planar UVs picked per triangle from its dominant normal (the export has no UVs)
+function addUVs(geo, metres) {
+  geo = geo.index ? geo.toNonIndexed() : geo;
+  const p = geo.attributes.position, n = p.count, uv = new Float32Array(n * 2);
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), nn = new THREE.Vector3();
+  for (let i = 0; i < n; i += 3) {
+    a.fromBufferAttribute(p, i); b.fromBufferAttribute(p, i + 1); c.fromBufferAttribute(p, i + 2);
+    nn.subVectors(c, b).cross(new THREE.Vector3().subVectors(a, b)).normalize();
+    const ax = Math.abs(nn.x), ay = Math.abs(nn.y), az = Math.abs(nn.z);
+    for (let k = 0; k < 3; k++) {
+      const v = [a, b, c][k];
+      let u, w;
+      if (ay >= ax && ay >= az) { u = v.x; w = v.z; } else if (ax >= az) { u = v.z; w = v.y; } else { u = v.x; w = v.y; }
+      uv[(i + k) * 2] = u / metres; uv[(i + k) * 2 + 1] = w / metres;
+    }
+  }
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x3a3632, transparent: true, opacity: 0.28 });
+edgeMat.clippingPlanes = [clip];
+const matCache = {};
+function styled(m) {
+  const key = m.name;
+  if (matCache[key]) return matCache[key];
+  const t = TEX[key];
+  const out = new THREE.MeshStandardMaterial({ name: key, color: t ? 0xffffff : m.color, map: t || null,
+    roughness: ROUGH[key] ?? 0.7, metalness: key === 'gate' || key === 'frame' || key === 'car' ? 0.6 : 0,
+    envMapIntensity: 0.9, side: THREE.DoubleSide });
+  if (key === 'glass') Object.assign(out, { transparent: true, opacity: 0.28, depthWrite: false, color: new THREE.Color(0x9cc7e6), roughness: .05, metalness: .1 });
+  if (key === 'wallcut') out.color = new THREE.Color(0x3b3b3b);
+  out.clippingPlanes = [clip]; out.clipShadows = true;
+  return (matCache[key] = out);
+}
+
+function prepare(root) {
+  floors = []; gate = null;
+  const edgeList = [];
+  root.traverse(o => {
+    if (!o.isMesh) return;
+    const name = o.material.name;
+    const t = TEX[name];
+    if (t) o.geometry = addUVs(o.geometry, t.userData.metres);
+    o.material = styled(o.material);
+    o.castShadow = !/^(road|ground|lawn|yard|floor_)/.test(o.name) && name !== 'glass';
+    o.receiveShadow = name !== 'glass';
+    if (/^floor_/.test(o.name)) floors.push(o);
+    o.userData.furn = FURN.test(o.name);
+    if (o.name === 'GATE') gate = o;
+    if (!/^(road|ground|lawn|stone|leaf|trunk|Ico|Cylinder|car_|wheel)/.test(o.name) && name !== 'glass' && name !== 'leaf') edgeList.push(o);
+  });
+  edgeList.forEach(o => {
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 28), edgeMat);
+    e.userData.furn = o.userData.furn; e.raycast = () => {};
+    o.add(e);
+  });
+  if (gate) { gate.userData.x0 = gate.position.x; setGate(gateOpen, true); }
+}
+
+// ---------- sliding car gate (11'-3" panel runs into the wall pocket)
+let gate = null, gateOpen = false, gateAnim = null;
+const GATE_RUN = (11.25 + 0.6) * FT;
+const gateBtn = document.getElementById('gateBtn');
+function setGate(open, instant) {
+  gateOpen = open;
+  gateBtn.setAttribute('aria-pressed', open); gateBtn.textContent = open ? 'Close car gate' : 'Open car gate';
+  if (!gate) return;
+  const from = gate.position.x, to = gate.userData.x0 + (open ? GATE_RUN : 0);
+  if (instant || matchMedia('(prefers-reduced-motion: reduce)').matches) { gate.position.x = to; gateAnim = null; redraw(true); return; }
+  const start = performance.now();
+  gateAnim = now => { const k = Math.min(1, (now - start) / 1600), e = k * k * (3 - 2 * k);
+    gate.position.x = from + (to - from) * e; redraw(k >= 1); if (k >= 1) gateAnim = null; };
+}
+gateBtn.addEventListener('click', () => setGate(!gateOpen));
+
+function load(v) {
+  const st = document.getElementById('status'); st.hidden = false; st.textContent = 'Loading model…';
+  const done = gltf => {
+    if (model) scene.remove(model);
+    model = gltf.scene;
+    if (!model.userData.prepared) { prepare(model); model.userData.prepared = true; }
+    else { floors = []; gate = null; model.traverse(o => { if (o.isMesh && /^floor_/.test(o.name)) floors.push(o); if (o.name === 'GATE') gate = o; }); setGate(gateOpen, true); }
+    scene.add(model); redraw(true);
+    applyToggles(); st.hidden = true; buildLabels(); renderFacts();
+  };
+  if (cache[v]) return done(cache[v]);
+  loader.load(`DH-GF-${v}.glb`, g => { cache[v] = g; done(g); }, undefined,
+    () => { st.textContent = 'The 3D model could not load. Check that DH-GF-' + v + '.glb sits next to this page.'; });
+}
+
+// --- viewpoints
+const viewsEl = document.getElementById('views');
+let anim = null;
+function goTo(name) {
+  const vw = INFO[version].views[name];
+  [...viewsEl.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.v === name));
+  const p0 = camera.position.clone(), t0 = controls.target.clone();
+  const p1 = new THREE.Vector3(...vw.eye), t1 = new THREE.Vector3(...vw.look);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const start = performance.now(), dur = reduce ? 1 : 900;
+  anim = now => {
+    const k = Math.min(1, (now - start) / dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    camera.position.lerpVectors(p0, p1, e); controls.target.lerpVectors(t0, t1, e);
+    if (k >= 1) anim = null;
+  };
+}
+function buildViews() {
+  viewsEl.innerHTML = '';
+  Object.keys(INFO[version].views).forEach(n => {
+    const b = document.createElement('button'); b.className = 'chip'; b.textContent = n; b.dataset.v = n;
+    b.setAttribute('aria-pressed', 'false'); b.onclick = () => goTo(n); viewsEl.appendChild(b);
+  });
+}
+
+// --- labels
+const labelsEl = document.getElementById('labels');
+let labels = [];
+function buildLabels() {
+  labelsEl.innerHTML = ''; labels = [];
+  INFO[version].rooms.forEach(r => {
+    if (r.key === 'OTS' || r.key === 'PORCH') return;
+    const d = document.createElement('div'); d.className = 'lbl'; d.textContent = r.name; labelsEl.appendChild(d);
+    labels.push({ el: d, p: new THREE.Vector3(...r.pos).add(new THREE.Vector3(0, 0.9, 0)), kind: 'room' });
+  });
+  INFO[version].doors.forEach(r => {
+    const d = document.createElement('div'); d.className = 'lbl door'; d.textContent = r.id + ' ' + r.w; labelsEl.appendChild(d);
+    labels.push({ el: d, p: new THREE.Vector3(...r.pos), kind: 'door' });
+  });
+  applyToggles();
+}
+const v3 = new THREE.Vector3();
+function placeLabels() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  labels.forEach(l => {
+    if (l.el.hidden) return;
+    v3.copy(l.p).project(camera);
+    const on = v3.z < 1 && Math.abs(v3.x) < 1.1 && Math.abs(v3.y) < 1.1;
+    l.el.style.visibility = on ? 'visible' : 'hidden';
+    if (on) l.el.style.transform = `translate(${(v3.x + 1) / 2 * w}px, ${(1 - v3.y) / 2 * h}px) translate(-50%,-50%)`;
+    l.el.style.left = '0'; l.el.style.top = '0';
+  });
+}
+
+// --- toggles & cut
+const tL = document.getElementById('tLabels'), tD = document.getElementById('tDoors'), tF = document.getElementById('tFurn');
+const cutH = document.getElementById('cutH'), cutOut = document.getElementById('cutOut');
+function fmt(ft) { const t = Math.round(ft * 12); return `${Math.floor(t / 12)}'-${t % 12}"`; }
+function applyToggles() {
+  labels.forEach(l => l.el.hidden = l.kind === 'room' ? !tL.checked : !tD.checked); redraw(false);
+  if (model) model.traverse(o => { if ((o.isMesh || o.isLineSegments) && o.userData.furn) o.visible = tF.checked; });
+  const hft = parseFloat(cutH.value);
+  clip.constant = (INFO[version].ffl) + hft * FT;
+  cutOut.value = fmt(hft);
+  if (hft >= 12.5) clip.constant = 100;
+  redraw(true);
+}
+[tL, tD, tF].forEach(x => x.addEventListener('change', applyToggles));
+cutH.addEventListener('input', applyToggles);
+
+// --- tap a room
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let down = null;
+canvas.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+canvas.addEventListener('pointerup', e => {
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) return;
+  const r = canvas.getBoundingClientRect();
+  ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(floors, false)[0];
+  if (!hit) return;
+  const key = hit.object.name.replace(/^floor_/, '').replace(/\.\d+$/, '');
+  const room = INFO[version].rooms.find(x => x.key === key);
+  if (room) showCard(room);
+});
+const card = document.getElementById('card');
+function showCard(r) {
+  document.getElementById('cardTitle').textContent = r.name;
+  document.getElementById('cardBody').innerHTML =
+    `<dt>Clear size</dt><dd>${r.size}</dd><dt>Area</dt><dd>${r.area.toFixed(1)} sq ft</dd>`;
+  card.hidden = false;
+}
+document.getElementById('cardClose').onclick = () => card.hidden = true;
+
+function renderFacts() {
+  const i = INFO[version];
+  document.getElementById('facts').textContent =
+    `${i.stair} · ${i.risers} risers @ ${i.riser}" · landing +${i.landing} · walls cut at the slider height`;
+}
+
+// --- option switch
+function setVersion(v) {
+  version = v;
+  document.getElementById('optL').setAttribute('aria-pressed', v === 'L');
+  document.getElementById('optU').setAttribute('aria-pressed', v === 'U');
+  buildViews(); load(v);
+}
+document.getElementById('optL').onclick = () => setVersion('L');
+document.getElementById('optU').onclick = () => setVersion('U');
+
+// --- loop
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); redraw(false);
+}
+new ResizeObserver(resize).observe(stage);
+controls.addEventListener('change', () => redraw(false));
+function tick(now) {
+  if (anim) { anim(now); dirty = true; }
+  if (gateAnim) gateAnim(now);
+  if (controls.update()) dirty = true;
+  if (dirty) { renderer.render(scene, camera); placeLabels(); dirty = false; }
+  requestAnimationFrame(tick);
+}
+const first = INFO.L.views['Aerial'];
+camera.position.set(...first.eye); controls.target.set(...first.look);
+resize(); setVersion('L'); goTo('Aerial'); requestAnimationFrame(tick);
+</script>

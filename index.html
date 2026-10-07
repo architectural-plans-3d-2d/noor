@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAATA HAMLET RESIDENCE | 3-Storey Canopy Architecture Studio</title>
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- WebGL Canvas -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Studio Header & Navigation -->
+    <header class="studio-header">
+      <div class="logo">
+        <span class="symbol">🏛️</span>
+        <h1>DAATA HAMLET <span>Canopy Residence</span></h1>
+      </div>
+      
+      <div class="camera-presets">
+        <button id="view-canopy" class="btn active">Canopy Elevation</button>
+        <button id="view-street" class="btn">Street Perspective</button>
+        <button id="view-aerial" class="btn">3/4 Aerial</button>
+        <button id="view-plan" class="btn">Top-Down Plan</button>
+      </div>
+
+      <div class="render-actions">
+        <button id="btn-night" class="btn">🌙 Night Illumination</button>
+        <button id="btn-wireframe" class="btn">Wireframe</button>
+        <button id="btn-columns" class="btn">Structural Columns</button>
+        <button id="btn-reset" class="btn">Reset View</button>
+      </div>
+    </header>
+
+    <!-- Storey Floor Explorer Dock -->
+    <div class="morph-dock">
+      <div class="morph-label">
+        <span class="title">Storey Cutaway:</span>
+        <span id="state-name" class="state-highlight">Full Residence (All Storeys)</span>
+      </div>
+      <div class="preset-modes">
+        <button class="mode-btn active" data-floor="all">All Floors</button>
+        <button class="mode-btn" data-floor="GF">Ground Floor (Drawing, 2 Beds, Lounge, Kitchen)</button>
+        <button class="mode-btn" data-floor="1F">First Floor (3 Beds, Lounge, Terrace)</button>
+        <button class="mode-btn" data-floor="2F">Second Floor (2 Beds, Servant, Pergola)</button>
+        <button class="mode-btn" data-floor="RF">Roof & Mumty (Water Tank & Deck)</button>
+      </div>
+    </div>
+
+    <!-- Architectural Telemetry & Program Card -->
+    <div class="info-card" id="info-card">
+      <div class="card-header">
+        <h3>ARCHITECTURAL SCHEDULE</h3>
+        <span class="status-dot"></span>
+      </div>
+      <p id="mode-summary">Contemporary 3-Storey canopy residence with continuous parallel RCC columns, stepped open terraces, and custom diagonal dirty kitchen.</p>
+      
+      <div class="telemetry-grid">
+        <div class="telem-item">
+          <span class="label">Plot Frontage / Area</span>
+          <span class="val">87'-11" (3,129.1 sq.ft / 12.8 Marla)</span>
+        </div>
+        <div class="telem-item">
+          <span class="label">Total Covered Area</span>
+          <span class="val">5,586 sq.ft (GF: 2,125 | 1F: 2,033 | 2F: 1,282)</span>
+        </div>
+        <div class="telem-item">
+          <span class="label">Drawing Room (GF)</span>
+          <span class="val">18'-0" &times; 16'-0" (288 sq.ft &gt; 15'x16')</span>
+        </div>
+        <div class="telem-item">
+          <span class="label">Bedrooms (All 3 Floors)</span>
+          <span class="val">7 Master Suites (All &ge; 15'-0" &times; 16'-0")</span>
+        </div>
+        <div class="telem-item">
+          <span class="label">Kitchens & Dirty Kitchen</span>
+          <span class="val">Wide 15'x11' Main + 100 sft NE Diagonal Apex</span>
+        </div>
+        <div class="telem-item">
+          <span class="label">RCC Structural Grid</span>
+          <span class="val">22 Continuous Parallel Columns (100% Flush)</span>
+        </div>
+        <div class="telem-item">
+          <span class="label">Clear Ceiling Heights</span>
+          <span class="val">10'-4" (3.15m) FFL Clear | 3.0m Living Rule</span>
+        </div>
+        <div class="telem-item">
+          <span class="label">Building Compliance</span>
+          <span class="val" style="color: #4ade80;">Approved Architectural Standards</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

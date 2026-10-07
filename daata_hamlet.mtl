@@ -1,0 +1,153 @@
+# DAATA HAMLET RESIDENCE PBR MATERIAL LIBRARY
+
+newmtl Plaster_White_Stucco
+Ka 0.187 0.185 0.180
+Kd 0.933 0.925 0.902
+Ks 0.020 0.020 0.020
+Ns 15
+d 1.00
+illum 2
+
+newmtl Canopy_Charcoal_Bronze
+Ka 0.027 0.028 0.033
+Kd 0.133 0.141 0.165
+Ks 0.850 0.850 0.850
+Ns 75
+d 1.00
+illum 2
+
+newmtl RCC_Concrete_Slabs
+Ka 0.153 0.151 0.147
+Kd 0.765 0.757 0.737
+Ks 0.040 0.040 0.040
+Ns 25
+d 1.00
+illum 2
+
+newmtl RCC_Columns_Concealed
+Ka 0.161 0.160 0.157
+Kd 0.804 0.800 0.784
+Ks 0.050 0.050 0.050
+Ns 19
+d 1.00
+illum 2
+
+newmtl RCC_Tie_Beams
+Ka 0.157 0.155 0.152
+Kd 0.784 0.776 0.761
+Ks 0.050 0.050 0.050
+Ns 19
+d 1.00
+illum 2
+
+newmtl Teak_Pergola_Louvers
+Ka 0.129 0.080 0.042
+Kd 0.647 0.400 0.212
+Ks 0.000 0.000 0.000
+Ns 52
+d 1.00
+illum 2
+
+newmtl Walnut_Entry_Door
+Ka 0.072 0.043 0.026
+Kd 0.361 0.216 0.129
+Ks 0.000 0.000 0.000
+Ns 60
+d 1.00
+illum 2
+
+newmtl Architectural_Glass
+Ka 0.141 0.173 0.184
+Kd 0.706 0.863 0.922
+Ks 0.000 0.000 0.000
+Ns 95
+d 0.47
+illum 2
+
+newmtl Aluminum_Graphite_Frames
+Ka 0.038 0.039 0.042
+Kd 0.188 0.196 0.212
+Ks 0.850 0.850 0.850
+Ns 70
+d 1.00
+illum 2
+
+newmtl Travertine_Stone_Cladding
+Ka 0.155 0.146 0.135
+Kd 0.776 0.729 0.675
+Ks 0.020 0.020 0.020
+Ns 12
+d 1.00
+illum 2
+
+newmtl Landscape_Lawn_Grass
+Ka 0.059 0.106 0.035
+Kd 0.294 0.529 0.176
+Ks 0.000 0.000 0.000
+Ns 9
+d 1.00
+illum 2
+
+newmtl Exterior_Stone_Paving
+Ka 0.166 0.163 0.155
+Kd 0.831 0.816 0.776
+Ks 0.050 0.050 0.050
+Ns 35
+d 1.00
+illum 2
+
+newmtl Public_Road_Asphalt
+Ka 0.033 0.033 0.035
+Kd 0.165 0.165 0.173
+Ks 0.000 0.000 0.000
+Ns 7
+d 1.00
+illum 2
+
+newmtl Interior_Marble_Flooring
+Ka 0.176 0.175 0.171
+Kd 0.882 0.875 0.855
+Ks 0.050 0.050 0.050
+Ns 65
+d 1.00
+illum 2
+
+newmtl Interior_Flooring
+Ka 0.169 0.166 0.161
+Kd 0.843 0.831 0.804
+Ks 0.000 0.000 0.000
+Ns 55
+d 1.00
+illum 2
+
+newmtl Black_Granite_Counters
+Ka 0.019 0.019 0.020
+Kd 0.094 0.094 0.102
+Ks 0.100 0.100 0.100
+Ns 82
+d 1.00
+illum 2
+
+newmtl Overhead_Water_Tank
+Ka 0.187 0.188 0.192
+Kd 0.933 0.941 0.961
+Ks 0.550 0.550 0.550
+Ns 75
+d 1.00
+illum 2
+
+newmtl MEP_Stainless_Ducts
+Ka 0.133 0.137 0.141
+Kd 0.667 0.686 0.706
+Ks 0.900 0.900 0.900
+Ns 70
+d 1.00
+illum 2
+
+newmtl Boundary_Wall_Site
+Ka 0.169 0.167 0.163
+Kd 0.843 0.835 0.816
+Ks 0.020 0.020 0.020
+Ns 12
+d 1.00
+illum 2

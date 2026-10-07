@@ -1,0 +1,110 @@
+"""
+Vector Template Exporter for TESS-LUMEN
+Generates SVG and DXF cutting/crease patterns with mountain/valley fold lines
+that can be printed on 1:1 paper or cut on standard craft tools.
+"""
+
+from pathlib import Path
+
+def generate_svg(filename="blueprints/tess_lumen_crease_pattern.svg"):
+    Path(filename).parent.mkdir(parents=True, exist_ok=True)
+    
+    svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" width="100%" height="100%">
+  <style>
+    .bg { fill: #0f1013; }
+    .border { fill: none; stroke: #4b5563; stroke-width: 2; }
+    .cut { fill: none; stroke: #ef4444; stroke-width: 1.5; } /* Red = Outer cut */
+    .mountain { fill: none; stroke: #3b82f6; stroke-width: 1.2; stroke-dasharray: 6,4; } /* Blue = Mountain Fold */
+    .valley { fill: none; stroke: #10b981; stroke-width: 1.2; stroke-dasharray: 2,3; } /* Green = Valley Fold */
+    .magnet { fill: #f59e0b; stroke: #d97706; stroke-width: 1; opacity: 0.8; }
+    .text { fill: #f3f4f6; font-family: monospace; font-size: 13px; }
+    .title { fill: #fbbf24; font-family: sans-serif; font-size: 18px; font-weight: bold; }
+    .dim { fill: #9ca3af; font-family: monospace; font-size: 11px; }
+  </style>
+
+  <rect class="bg" width="1200" height="650" rx="8"/>
+
+  <!-- Title & Instructions -->
+  <text x="40" y="40" class="title">TESS-LUMEN // 1:1 DIY ORIGAMI CREASE &amp; CUTTING TEMPLATE</text>
+  <text x="40" y="62" class="dim">SCALE 1:1 (1200mm x 600mm) | CANVAS LIVING HINGE MATRIX | PRINTABLE ON STANDARD A4/LETTER SHEETS</text>
+
+  <g transform="translate(40, 85)">
+    <!-- Outer Perimeter Boundary (1120mm x 520mm active layout) -->
+    <rect class="cut" x="0" y="0" width="1120" height="500" rx="4"/>
+
+    <!-- Horizontal Center Valley Fold -->
+    <line class="valley" x1="0" y1="250" x2="1120" y2="250"/>
+
+    <!-- Grid Columns & Diagonal Mountain/Valley Tessellation -->
+    <!-- Col 1 (0 to 280) -->
+    <line class="mountain" x1="140" y1="0" x2="0" y2="250"/>
+    <line class="mountain" x1="140" y1="0" x2="280" y2="250"/>
+    <line class="mountain" x1="140" y1="500" x2="0" y2="250"/>
+    <line class="mountain" x1="140" y1="500" x2="280" y2="250"/>
+    <line class="valley" x1="280" y1="0" x2="280" y2="500"/>
+
+    <!-- Col 2 (280 to 560) -->
+    <line class="mountain" x1="420" y1="0" x2="280" y2="250"/>
+    <line class="mountain" x1="420" y1="0" x2="560" y2="250"/>
+    <line class="mountain" x1="420" y1="500" x2="280" y2="250"/>
+    <line class="mountain" x1="420" y1="500" x2="560" y2="250"/>
+    <line class="valley" x1="560" y1="0" x2="560" y2="500"/>
+
+    <!-- Col 3 (560 to 840) -->
+    <line class="mountain" x1="700" y1="0" x2="560" y2="250"/>
+    <line class="mountain" x1="700" y1="0" x2="840" y2="250"/>
+    <line class="mountain" x1="700" y1="500" x2="560" y2="250"/>
+    <line class="mountain" x1="700" y1="500" x2="840" y2="250"/>
+    <line class="valley" x1="840" y1="0" x2="840" y2="500"/>
+
+    <!-- Col 4 (840 to 1120) -->
+    <line class="mountain" x1="980" y1="0" x2="840" y2="250"/>
+    <line class="mountain" x1="980" y1="0" x2="1120" y2="250"/>
+    <line class="mountain" x1="980" y1="500" x2="840" y2="250"/>
+    <line class="mountain" x1="980" y1="500" x2="1120" y2="250"/>
+
+    <!-- Magnetic Snap Node Circles (Ø8mm N52 Neodymium Locations) -->
+    <circle class="magnet" cx="140" cy="18" r="8"/>
+    <circle class="magnet" cx="420" cy="18" r="8"/>
+    <circle class="magnet" cx="700" cy="18" r="8"/>
+    <circle class="magnet" cx="980" cy="18" r="8"/>
+
+    <circle class="magnet" cx="140" cy="482" r="8"/>
+    <circle class="magnet" cx="420" cy="482" r="8"/>
+    <circle class="magnet" cx="700" cy="482" r="8"/>
+    <circle class="magnet" cx="980" cy="482" r="8"/>
+
+    <!-- Outer Perimeter Snap Nodes -->
+    <circle class="magnet" cx="18" cy="125" r="8"/>
+    <circle class="magnet" cx="18" cy="375" r="8"/>
+    <circle class="magnet" cx="1102" cy="125" r="8"/>
+    <circle class="magnet" cx="1102" cy="375" r="8"/>
+
+    <!-- Annotations -->
+    <text x="110" y="140" class="text">BIRCH TRIANGLE</text>
+    <text x="390" y="140" class="text">FELT ACCENT</text>
+    <text x="670" y="140" class="text">BIRCH TRIANGLE</text>
+    <text x="950" y="140" class="text">FELT ACCENT</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(40, 608)">
+    <line class="cut" x1="0" y1="0" x2="35" y2="0"/>
+    <text x="45" y="4" class="dim">RED: Through Cut Line</text>
+
+    <line class="mountain" x1="220" y1="0" x2="255" y2="0"/>
+    <text x="265" y="4" class="dim">BLUE DASH: Mountain Fold</text>
+
+    <line class="valley" x1="480" y1="0" x2="515" y2="0"/>
+    <text x="525" y="4" class="dim">GREEN DOT: Valley Fold</text>
+
+    <circle class="magnet" cx="740" cy="0" r="7"/>
+    <text x="755" y="4" class="dim">GOLD DISC: N52 Magnet Pocket (Ø8mm x 2mm)</text>
+  </g>
+</svg>"""
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(svg)
+    print(f"[+] SVG exported: {filename}")
+
+if __name__ == "__main__":
+    generate_svg()

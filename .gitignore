@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing and Coverage
+coverage/
+
+# Production Build
+dist/
+
+# Logs and Environment
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor and IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS and Temporary files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Python and Blender cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.blend1
+*.blend2
+.pytest_cache/

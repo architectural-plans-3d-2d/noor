@@ -1,0 +1,257 @@
+:root {
+  --bg-primary: #0f1013;
+  --bg-panel: rgba(20, 22, 28, 0.88);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --accent: #d97706; /* warm amber architectural tone */
+  --accent-glow: rgba(217, 119, 6, 0.35);
+  --accent-light: #fbbf24;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  font-family: var(--font-family);
+  color: var(--text-main);
+  user-select: none;
+}
+
+#webgl-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+/* Header */
+.studio-header {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  right: 20px;
+  height: 54px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 10;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo .symbol {
+  font-size: 22px;
+}
+
+.logo h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.logo h1 span {
+  color: var(--accent-light);
+  font-weight: 400;
+  font-size: 13px;
+  margin-left: 4px;
+}
+
+.camera-presets, .render-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+/* Kinematic Morph / Floor Dock */
+.morph-dock {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 680px;
+  max-width: 92vw;
+  background: var(--bg-panel);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 14px 20px;
+  z-index: 10;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.morph-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.morph-label .title {
+  color: var(--text-muted);
+}
+
+.morph-label .state-highlight {
+  font-weight: 700;
+  color: var(--accent-light);
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider-wrapper .tag {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+#morph-slider {
+  flex: 1;
+  accent-color: var(--accent-light);
+  cursor: pointer;
+}
+
+.preset-modes {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.mode-btn.active {
+  background: rgba(217, 119, 6, 0.2);
+  border-color: var(--accent);
+  color: var(--accent-light);
+  font-weight: 600;
+}
+
+/* Live Telemetry Info Card */
+.info-card {
+  position: absolute;
+  top: 86px;
+  right: 20px;
+  width: 350px;
+  max-width: 90vw;
+  background: var(--bg-panel);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 16px 18px;
+  z-index: 10;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.card-header h3 {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.info-card p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 10px;
+}
+
+.telem-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+}
+
+.telem-item .label {
+  color: var(--text-muted);
+}
+
+.telem-item .val {
+  font-weight: 600;
+  color: var(--text-main);
+}
