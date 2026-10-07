@@ -36,14 +36,14 @@
       padding: 24px;
     }
     .glass-card {
-      background: rgba(22, 24, 29, 0.85);
+      background: rgba(22, 24, 29, 0.88);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 16px 20px;
       pointer-events: auto;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
     }
     .header-bar {
       display: flex;
@@ -86,7 +86,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      max-width: 900px;
+      max-width: 960px;
       width: calc(100% - 48px);
     }
     .mode-buttons {
@@ -95,7 +95,7 @@
       gap: 10px;
     }
     .btn {
-      background: rgba(36, 40, 48, 0.8);
+      background: rgba(36, 40, 48, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: #E2E8F0;
       padding: 12px 14px;
@@ -116,7 +116,7 @@
       font-weight: 400;
     }
     .btn:hover {
-      background: rgba(55, 62, 75, 0.9);
+      background: rgba(55, 62, 75, 0.95);
       border-color: #8F765A;
       transform: translateY(-2px);
     }
@@ -152,37 +152,28 @@
       gap: 8px;
     }
     .toggle-btn {
-      flex: 1;
-      padding: 8px;
-      background: rgba(30, 34, 42, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 14px;
+      background: rgba(30, 34, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: #CBD5E1;
       font-size: 11px;
+      font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
       text-align: center;
+      transition: background 0.15s ease;
+    }
+    .toggle-btn:hover {
+      background: rgba(45, 52, 64, 0.9);
     }
     .toggle-btn.active {
       background: #3B82F6;
       border-color: #60A5FA;
       color: #FFF;
     }
-    .loading-spinner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 16px;
-      color: #9E9790;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
   <div id="canvas-container"></div>
@@ -198,9 +189,9 @@
         <div class="subtitle">STOOL &bull; STORAGE &bull; STUDY DESK &bull; KINEMATIC JOINERY</div>
       </div>
       <div class="tool-toggles">
-        <button class="toggle-btn" id="btn-wireframe">Wireframe</button>
-        <button class="toggle-btn" id="btn-auto-rotate">Auto Rotate</button>
-        <button class="toggle-btn active" id="btn-shadows">Studio Lights</button>
+        <button class="toggle-btn" id="btn-wireframe" onclick="toggleWireframe()">Wireframe</button>
+        <button class="toggle-btn" id="btn-auto-rotate" onclick="toggleRotate()">Auto Rotate</button>
+        <button class="toggle-btn" onclick="resetCamera()">Reset View</button>
       </div>
     </div>
 
@@ -242,19 +233,19 @@
     <!-- Bottom Configuration Switcher -->
     <div class="controls-panel">
       <div class="glass-card mode-buttons">
-        <button class="btn" onclick="switchMode('stool')">
+        <button class="btn" data-mode="stool" onclick="switchMode('stool', this)">
           <span>01. STOOL BENCH</span>
           <span class="dim-sub">900 &times; 450 &times; 450 mm</span>
         </button>
-        <button class="btn" onclick="switchMode('storage')">
+        <button class="btn" data-mode="storage" onclick="switchMode('storage', this)">
           <span>02. STORAGE CABINET</span>
           <span class="dim-sub">450 &times; 450 &times; 900 mm</span>
         </button>
-        <button class="btn" onclick="switchMode('desk')">
+        <button class="btn" data-mode="desk" onclick="switchMode('desk', this)">
           <span>03. STUDY DESK</span>
           <span class="dim-sub">Cantilever Desk + Shelves</span>
         </button>
-        <button class="btn active" onclick="switchMode('lineup')">
+        <button class="btn active" data-mode="lineup" onclick="switchMode('lineup', this)">
           <span>ALL 3 CONFIGURATIONS</span>
           <span class="dim-sub">Hero 3-in-1 Lineup</span>
         </button>
@@ -262,67 +253,325 @@
     </div>
   </div>
 
-  <div id="loading" class="loading-spinner">
-    <div>Loading 3D Architectural Model...</div>
-  </div>
-
   <script>
     let scene, camera, renderer, controls;
-    let currentModel = null;
+    let modelRoot = null;
     let autoRotate = false;
     let isWireframe = false;
-    const loader = new THREE.GLTFLoader();
+    let activeMode = 'lineup';
 
-    // Wood & Metal PBR Material Definitions
-    const birchMaterial = new THREE.MeshStandardMaterial({
+    // Materials
+    const woodMat = new THREE.MeshStandardMaterial({
       color: 0xdfbe92,
+      roughness: 0.38,
+      metalness: 0.05
+    });
+
+    const woodDarkMat = new THREE.MeshStandardMaterial({
+      color: 0xcaab82,
       roughness: 0.42,
       metalness: 0.05
     });
 
-    const steelMaterial = new THREE.MeshStandardMaterial({
-      color: 0xd0d5dd,
-      roughness: 0.22,
+    const steelMat = new THREE.MeshStandardMaterial({
+      color: 0xd6dbe1,
+      roughness: 0.20,
       metalness: 0.95
     });
 
-    const propsMaterial = new THREE.MeshStandardMaterial({
-      color: 0x24272c,
-      roughness: 0.35,
-      metalness: 0.75
+    const propMat = new THREE.MeshStandardMaterial({
+      color: 0x1e2024,
+      roughness: 0.28,
+      metalness: 0.85
     });
+
+    function createBox(w, d, h, x=0, y=0, z=0, mat=woodMat) {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, z, -y); // Map Three.js Y as up, Z as forward/back
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      return mesh;
+    }
+
+    function createCylinder(r, h, x=0, y=0, z=0, axis='y', mat=steelMat) {
+      const geo = new THREE.CylinderGeometry(r, r, h, 24);
+      const mesh = new THREE.Mesh(geo, mat);
+      if (axis === 'z') mesh.rotation.x = Math.PI / 2;
+      if (axis === 'x') mesh.rotation.z = Math.PI / 2;
+      mesh.position.set(x, z, -y);
+      mesh.castShadow = true;
+      return mesh;
+    }
+
+    function buildPianoHinge(length=0.450) {
+      const g = new THREE.Group();
+      // Center pin
+      g.add(createCylinder(0.003, length, 0, 0, 0, 'z', steelMat));
+      // Alternating knuckles
+      const numK = 16;
+      const kLen = length / numK;
+      for (let i = 0; i < numK; i++) {
+        const yPos = -length/2 + (i + 0.5) * kLen;
+        g.add(createCylinder(0.005, kLen * 0.94, 0, yPos, 0, 'z', steelMat));
+      }
+      // Leaves
+      g.add(createBox(0.024, length, 0.002, -0.012, 0, -0.002, steelMat));
+      g.add(createBox(0.024, length, 0.002, 0.012, 0, -0.002, steelMat));
+      return g;
+    }
+
+    function buildFoldingStay(len=0.230) {
+      const g = new THREE.Group();
+      const halfL = len / 2;
+      // Upper arm
+      g.add(createBox(0.014, 0.003, halfL, 0, 0, halfL/2, steelMat));
+      // Lower arm angled
+      const lower = createBox(0.014, 0.003, halfL, 0, 0, halfL/2, steelMat);
+      lower.rotation.x = 0.65;
+      lower.position.set(0, halfL, 0);
+      g.add(lower);
+      // Knuckle pin
+      g.add(createCylinder(0.005, 0.012, 0, 0, halfL, 'x', steelMat));
+      return g;
+    }
+
+    function buildVerticalLock() {
+      const g = new THREE.Group();
+      // Wooden block stop
+      g.add(createBox(0.038, 0.022, 0.045, 0, 0, 0.022, woodDarkMat));
+      // Latch keeper and blade
+      g.add(createBox(0.024, 0.008, 0.020, 0, 0.012, -0.014, steelMat));
+      g.add(createBox(0.018, 0.006, 0.036, 0, 0.014, 0.010, steelMat));
+      return g;
+    }
+
+    function buildBoxCarcass(hasFront=true, hasShelf=true, shelfZ=0.225) {
+      const g = new THREE.Group();
+      const w = 0.450, d = 0.450, h = 0.450, t = 0.018;
+
+      // Left & Right sides
+      g.add(createBox(t, d, h, -w/2 + t/2, 0, h/2));
+      g.add(createBox(t, d, h, w/2 - t/2, 0, h/2));
+      // Top & Bottom
+      g.add(createBox(w - 2*t, d, t, 0, 0, h - t/2));
+      g.add(createBox(w - 2*t, d, t, 0, 0, t/2));
+      // Back
+      g.add(createBox(w - 2*t, t, h - 2*t, 0, d/2 - t/2, h/2));
+
+      // Internal shelf
+      if (hasShelf) {
+        g.add(createBox(w - 2*t, d - 2*t, t, 0, 0, shelfZ));
+      }
+
+      // Front
+      if (hasFront) {
+        g.add(createBox(w - 2*t, t, h - 2*t, 0, -d/2 + t/2, h/2));
+      }
+
+      return g;
+    }
+
+    function buildStool() {
+      const g = new THREE.Group();
+      const b1 = buildBoxCarcass(true, false);
+      b1.position.x = -0.225;
+      const b2 = buildBoxCarcass(true, false);
+      b2.position.x = 0.225;
+      g.add(b1);
+      g.add(b2);
+
+      // Continuous piano hinge along top center seam
+      const hinge = buildPianoHinge(0.450);
+      hinge.position.set(0, 0, 0.452);
+      g.add(hinge);
+
+      return g;
+    }
+
+    function buildStorage() {
+      const g = new THREE.Group();
+      const bLower = buildBoxCarcass(true, false);
+      const bUpper = buildBoxCarcass(true, false);
+      bUpper.position.y = 0.450; // Z in our createBox helper maps to y in position
+      g.add(bLower);
+      g.add(bUpper);
+
+      // Side vertical locks
+      const l1 = buildVerticalLock();
+      l1.position.set(-0.235, 0, 0.450);
+      const l2 = buildVerticalLock();
+      l2.position.set(0.235, 0, 0.450);
+      g.add(l1);
+      g.add(l2);
+
+      return g;
+    }
+
+    function buildDesk() {
+      const g = new THREE.Group();
+      const w = 0.450, d = 0.450, h = 0.450, t = 0.018;
+
+      // Base unit (open storage)
+      const bLower = buildBoxCarcass(false, true, 0.225);
+      // Upper unit (open storage with book shelf)
+      const bUpper = buildBoxCarcass(false, true, 0.225);
+      bUpper.position.y = h;
+      g.add(bLower);
+      g.add(bUpper);
+
+      // Fold-down cantilever desk leaf (450mm forward projection)
+      const deskW = w - 2*t - 0.004;
+      const deskD = h - 2*t;
+      const desk = createBox(deskW, deskD, t, 0, -d/2 - deskD/2, h + t/2);
+      g.add(desk);
+
+      // Desk piano hinge along fold joint
+      const hinge = buildPianoHinge(deskW);
+      hinge.rotation.y = Math.PI / 2;
+      hinge.position.set(0, -d/2, h + t/2);
+      g.add(hinge);
+
+      // Dual folding stay brackets underneath
+      const stayL = buildFoldingStay(0.220);
+      stayL.rotation.x = -0.55;
+      stayL.position.set(-deskW/2 + 0.022, -d/2 - 0.110, h - 0.070);
+      const stayR = buildFoldingStay(0.220);
+      stayR.rotation.x = -0.55;
+      stayR.position.set(deskW/2 - 0.022, -d/2 - 0.110, h - 0.070);
+      g.add(stayL);
+      g.add(stayR);
+
+      // Modern Aluminum Laptop Prop
+      const laptopBase = createBox(0.304, 0.212, 0.008, 0, -d/2 - deskD/2 + 0.02, h + t + 0.004, propMat);
+      const screen = createBox(0.304, 0.006, 0.198, 0, -d/2 - deskD/2 + 0.12, h + t + 0.100, propMat);
+      screen.rotation.x = -0.32;
+      g.add(laptopBase);
+      g.add(screen);
+
+      // Books on upper shelf
+      const book1 = createBox(0.140, 0.200, 0.024, -0.100, 0, h + 0.225 + t + 0.012, woodDarkMat);
+      const book2 = createBox(0.130, 0.190, 0.020, -0.100, 0, h + 0.225 + t + 0.034, woodDarkMat);
+      g.add(book1);
+      g.add(book2);
+
+      // Side vertical locks
+      const l1 = buildVerticalLock();
+      l1.position.set(-0.235, 0, h);
+      const l2 = buildVerticalLock();
+      l2.position.set(0.235, 0, h);
+      g.add(l1);
+      g.add(l2);
+
+      return g;
+    }
+
+    function buildLineup() {
+      const g = new THREE.Group();
+      
+      const s1 = buildStool();
+      s1.position.x = -1.35;
+      
+      const s2 = buildStorage();
+      s2.position.x = 0.0;
+      
+      const s3 = buildDesk();
+      s3.position.x = 1.35;
+
+      g.add(s1);
+      g.add(s2);
+      g.add(s3);
+      return g;
+    }
+
+    function showConfiguration(mode) {
+      if (modelRoot) {
+        scene.remove(modelRoot);
+      }
+
+      activeMode = mode;
+
+      if (mode === 'stool') {
+        modelRoot = buildStool();
+        controls.target.set(0, 0.25, 0);
+        camera.position.set(0, 1.2, 2.5);
+      } else if (mode === 'storage') {
+        modelRoot = buildStorage();
+        controls.target.set(0, 0.45, 0);
+        camera.position.set(0, 1.4, 2.8);
+      } else if (mode === 'desk') {
+        modelRoot = buildDesk();
+        controls.target.set(0, 0.45, 0);
+        camera.position.set(0.8, 1.3, 2.6);
+      } else {
+        modelRoot = buildLineup();
+        controls.target.set(0, 0.45, 0);
+        camera.position.set(0.4, 1.5, 4.2);
+      }
+
+      applyWireframeState();
+      scene.add(modelRoot);
+      controls.update();
+    }
+
+    function switchMode(mode, btn) {
+      document.querySelectorAll('.mode-buttons .btn').forEach(b => b.classList.remove('active'));
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        const defaultBtn = document.querySelector(`[data-mode="${mode}"]`);
+        if (defaultBtn) defaultBtn.classList.add('active');
+      }
+      showConfiguration(mode);
+    }
+
+    function toggleWireframe() {
+      isWireframe = !isWireframe;
+      document.getElementById('btn-wireframe').classList.toggle('active', isWireframe);
+      applyWireframeState();
+    }
+
+    function applyWireframeState() {
+      woodMat.wireframe = isWireframe;
+      woodDarkMat.wireframe = isWireframe;
+      steelMat.wireframe = isWireframe;
+      propMat.wireframe = isWireframe;
+    }
+
+    function toggleRotate() {
+      autoRotate = !autoRotate;
+      document.getElementById('btn-auto-rotate').classList.toggle('active', autoRotate);
+    }
+
+    function resetCamera() {
+      switchMode(activeMode);
+    }
 
     function init() {
       const container = document.getElementById('canvas-container');
 
-      // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x131519);
-      scene.fog = new THREE.FogExp2(0x131519, 0.08);
+      scene.fog = new THREE.FogExp2(0x131519, 0.06);
 
-      // Camera
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 1.8, 4.2);
 
-      // Renderer
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.1;
+      renderer.toneMappingExposure = 1.15;
       container.appendChild(renderer.domElement);
 
-      // Controls
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
-      controls.maxPolarAngle = Math.PI / 2 + 0.02; // Prevent going beneath floor
-      controls.target.set(0, 0.45, 0);
+      controls.maxPolarAngle = Math.PI / 2 + 0.01;
 
-      // Studio Ground Plane (Shadow catcher)
-      const floorGeo = new THREE.PlaneGeometry(30, 30);
+      // Studio Ground Floor Shadow Catcher
+      const floorGeo = new THREE.PlaneGeometry(35, 35);
       const floorMat = new THREE.ShadowMaterial({ opacity: 0.35 });
       const floor = new THREE.Mesh(floorGeo, floorMat);
       floor.rotation.x = -Math.PI / 2;
@@ -330,120 +579,36 @@
       floor.receiveShadow = true;
       scene.add(floor);
 
-      // Studio Grid
+      // Studio Floor Grid
       const grid = new THREE.GridHelper(20, 40, 0x334155, 0x1e293b);
       grid.position.y = 0.001;
       scene.add(grid);
 
-      // Lighting Setup
-      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+      // Studio Lighting
+      const ambient = new THREE.AmbientLight(0xffffff, 0.65);
       scene.add(ambient);
 
-      // Key Softbox Light
       const keyLight = new THREE.DirectionalLight(0xfffaed, 1.4);
       keyLight.position.set(3.5, 5.0, 3.5);
       keyLight.castShadow = true;
       keyLight.shadow.mapSize.width = 2048;
       keyLight.shadow.mapSize.height = 2048;
-      keyLight.shadow.camera.near = 0.5;
-      keyLight.shadow.camera.far = 15;
       keyLight.shadow.bias = -0.0005;
       scene.add(keyLight);
 
-      // Fill Light
-      const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.6);
+      const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.7);
       fillLight.position.set(-4.0, 3.0, -2.0);
       scene.add(fillLight);
 
-      // Rim Light
       const rimLight = new THREE.DirectionalLight(0xffffff, 0.8);
       rimLight.position.set(0, 3.0, -4.0);
       scene.add(rimLight);
 
-      // Load initial model (Hero Lineup)
-      switchMode('lineup');
+      // Show Lineup by default
+      showConfiguration('lineup');
 
-      // Event Listeners
       window.addEventListener('resize', onWindowResize);
-      setupToggles();
       animate();
-    }
-
-    function loadModel(path, targetY = 0.45, camDist = 4.2) {
-      document.getElementById('loading').style.display = 'flex';
-      
-      if (currentModel) {
-        scene.remove(currentModel);
-      }
-
-      loader.load(
-        path,
-        (gltf) => {
-          currentModel = gltf.scene;
-          
-          currentModel.traverse((child) => {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.receiveShadow = true;
-              
-              // Apply rich PBR shaders
-              const name = child.name.toLowerCase();
-              if (name.includes('hinge') || name.includes('bracket') || name.includes('stay') || name.includes('lock') || name.includes('metal')) {
-                child.material = steelMaterial;
-              } else if (name.includes('prop') || name.includes('laptop')) {
-                child.material = propsMaterial;
-              } else {
-                child.material = birchMaterial;
-              }
-            }
-          });
-
-          scene.add(currentModel);
-          document.getElementById('loading').style.display = 'none';
-
-          // Smooth camera focus
-          controls.target.set(0, targetY, 0);
-        },
-        undefined,
-        (error) => {
-          console.error('Failed to load GLTF model:', error);
-          document.getElementById('loading').innerHTML = '<span>Failed to load 3D model.</span>';
-        }
-      );
-    }
-
-    function switchMode(mode) {
-      document.querySelectorAll('.mode-buttons .btn').forEach(b => b.classList.remove('active'));
-      event?.currentTarget?.classList.add('active');
-
-      if (mode === 'stool') {
-        loadModel('models/transformable_box_stool.glb', 0.25, 2.8);
-      } else if (mode === 'storage') {
-        loadModel('models/transformable_box_storage.glb', 0.45, 3.2);
-      } else if (mode === 'desk') {
-        loadModel('models/transformable_box_desk.glb', 0.45, 3.5);
-      } else {
-        loadModel('models/transformable_box_lineup.glb', 0.45, 4.5);
-      }
-    }
-
-    function setupToggles() {
-      const wireBtn = document.getElementById('btn-wireframe');
-      wireBtn.addEventListener('click', () => {
-        isWireframe = !isWireframe;
-        wireBtn.classList.toggle('active', isWireframe);
-        if (currentModel) {
-          currentModel.traverse((child) => {
-            if (child.isMesh) child.material.wireframe = isWireframe;
-          });
-        }
-      });
-
-      const rotBtn = document.getElementById('btn-auto-rotate');
-      rotBtn.addEventListener('click', () => {
-        autoRotate = !autoRotate;
-        rotBtn.classList.toggle('active', autoRotate);
-      });
     }
 
     function onWindowResize() {
@@ -454,8 +619,8 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      if (autoRotate && currentModel) {
-        currentModel.rotation.y += 0.005;
+      if (autoRotate && modelRoot) {
+        modelRoot.rotation.y += 0.005;
       }
       controls.update();
       renderer.render(scene, camera);
